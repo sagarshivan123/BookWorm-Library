@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import {BrowserRouter as Router ,Routes ,Route} from "react-router-dom";
+import {BrowserRouter as Router ,Routes ,Route,Navigate} from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
@@ -16,9 +16,20 @@ import { fetchAllBorrowedBooks } from "./store/slices/borrowSlice.js";
 
 
 
+const GuestRoute = ({ children }) => {
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  return !isAuthenticated ? children : <Navigate to="/" replace />;
+};
+
+
 const App = () => {
   const {user, isAuthenticated}=useSelector((state)=>state.auth);
   const dispatch=useDispatch();
+
+  useEffect(() => {
+    dispatch(getUser());
+  }, [dispatch]);
+
   useEffect(() => {
    
     if(isAuthenticated && user?.role==="user"){
@@ -34,8 +45,8 @@ const App = () => {
   return <Router>
   <Routes>
     <Route path="/" element={<Home/>}/>
-    <Route path="/login" element={<Login/>}/>
-    <Route path="/register" element={<Register/>}/>
+    <Route path="/login" element={<GuestRoute><Login /></GuestRoute>}/>
+    <Route path="/register" element={<GuestRoute><Register/></GuestRoute>}/>
     <Route path="/password/forgot" element={<ForgotPassword/>}/>
     <Route path="/otp-verification/:email" element={<OTP/>}/>
     <Route path="/password/reset/:token" element={<ResetPassword/>}/>

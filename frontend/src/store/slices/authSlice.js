@@ -143,17 +143,25 @@ export const resetAuthSlice=()=>(dispatch)=>{
   dispatch(authSlice.actions.resetAuthSlice());
 }
 
-export const register=(data)=>
-async(dispatch)=>{
-  dispatch(authSlice.actions.registerRequest());
-  await api.post("/auth/register",data,{
-   
-  }).then(res=>{
-    dispatch(authSlice.actions.registerSuccess(res.data))
-  }).catch(error=>{
-    dispatch(authSlice.actions.registerFailed(error.response.data.message))
-  })
-}
+export const register = (data) =>
+  async (dispatch) => {
+    dispatch(authSlice.actions.registerRequest());
+    try {
+      const res = await api.post("/auth/register", data, {
+        headers: { "Content-Type": "application/json" }
+      });
+      console.log("✅ API response:", res.data);
+      dispatch(authSlice.actions.registerSuccess(res.data));
+      // return API data so the component can await dispatch(register(...))
+      return res.data;
+    } catch (error) {
+      console.log("❌ API error:", error?.response?.data);
+      const msg = error?.response?.data?.message || error?.message || "Registration failed";
+      dispatch(authSlice.actions.registerFailed(msg));
+      // reject so caller can catch
+      throw new Error(msg);
+    }
+  }
 
 export const otpVerification =(email,otp)=>
   async(dispatch)=>{

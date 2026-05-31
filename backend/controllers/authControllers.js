@@ -14,64 +14,46 @@ import crypto from 'crypto';
 
 
 // Register a user
-export const register= catchAsyncErrors(async(req,res,next)=>{
-try{
-const {name,email,password}=req.body;
+export const register = catchAsyncErrors(async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
 
-if(!name || !email || !password){
-  return next(new ErrorHandler("Please enter all fields",400));
-}
+    if (!name || !email || !password) {
+      return next(new ErrorHandler("Please enter all fields", 400));
+    }
 
-// Check if user is already registered
-const isRegistered=await User.findOne({email , accountVerified:true});
+    const isRegistered = await User.findOne({ email, accountVerified: true });
+    if (isRegistered) {
+      return next(new ErrorHandler("User already registered, please login", 400));
+    }
 
+    const PasswordValidationError = validatePassword(password);
+    if (PasswordValidationError) {
+      return next(new ErrorHandler(PasswordValidationError, 400));
+    }
 
-// If user is registered, send error
-if(isRegistered){
-  return next(new ErrorHandler("User already registered, please login",400));
-}
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-const registerationAttemptsByUser=await User.find({
-  email,accountVerified:false
-})
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+    });
 
+    const verificationCode = user.generateVerificationCode();
+    await user.save();
 
+    await sendVerificationCode(verificationCode, email);
 
-// Validate password length
-const PasswordValidationError=validatePassword(password);
-if(PasswordValidationError){
-  return next(new ErrorHandler(PasswordValidationError,400));
-}
-
-// Hash password
-const hashedPassword=await bcrypt.hash(password,10);
-
-// Create new user
-const user=await User.create({
-  name,
-  email,
-  password:hashedPassword,
+    // ✅ Send the message the frontend actually checks for
+    res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
 });
-
-// Generate verification code and save user
-const verificationCode= user.generateVerificationCode();
-await user.save();
-console.log("user",user);
-await sendVerificationCode(verificationCode,email );
-res.status(200).json({
-  success:true,
-  message:"Registered successfully.",
-})
-
-user.accountVerified=true;
-user.verificationCode=null;
-user.verificationCodeExpire=null;
-await user.save({validateModifiedOnly:true});
-
-}catch(err){
-  next(err);
-}
-})
 
 export const verifyOTP=catchAsyncErrors(async(req,res,next)=>{
 const {email,otp}=req.body;
@@ -138,15 +120,19 @@ export const login=catchAsyncErrors(async(req,res,next)=>{
   sendToken(user,200,"Login successful",res);
 })
 
-export const logOut=catchAsyncErrors(async(req,res,next)=>{
-  res.status(200).cookie("token",null,{
-    expires:new Date(Date.now()),
-    httpOnly:true,
-  }).json({
-    success:true,
-    message:"Logged out successfully",
-  })
-})
+export const logOut = catchAsyncErrors(async (req, res, next) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    path: "/",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
+});
 
 export const getUser=catchAsyncErrors(async(req,res,next)=>{ 
   console.log("User data retrieved successfully");
