@@ -45,6 +45,9 @@ const openRecordBookPopup=(bookId)=>{
   setBorrowBookId(bookId);
   dispatch(toggleRecordBookPopup());
 }
+useEffect(() => {
+  dispatch(fetchAllBooks());
+}, [dispatch]);
 
 useEffect(()=>{
   if(message||borrowSliceMessage){

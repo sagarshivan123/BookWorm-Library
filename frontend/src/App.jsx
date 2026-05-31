@@ -41,7 +41,7 @@ const App = () => {
       dispatch(fetchAllUsers());
       dispatch(fetchAllBorrowedBooks());
     }
-  },[isAuthenticated]);
+  },[isAuthenticated,user,dispatch]);
   return <Router>
   <Routes>
     <Route path="/" element={<Home/>}/>
