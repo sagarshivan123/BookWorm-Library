@@ -33,7 +33,7 @@ const App = () => {
   useEffect(() => {
    
     if(isAuthenticated && user?.role==="user"){
-      dispatch(getUser());
+      
       dispatch(fetchAllBooks())
       dispatch(fetchUserBorrowedBooks());
     }
@@ -41,7 +41,7 @@ const App = () => {
       dispatch(fetchAllUsers());
       dispatch(fetchAllBorrowedBooks());
     }
-  },[isAuthenticated,user,dispatch]);
+  },[isAuthenticated,user?.role]);
   return <Router>
   <Routes>
     <Route path="/" element={<Home/>}/>
