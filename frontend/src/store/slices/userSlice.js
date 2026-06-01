@@ -49,17 +49,26 @@ export const fetchAllUsers=()=>async(dispatch)=>{
 
 export const addNewAdmin=(data)=>async(dispatch)=>{
   dispatch(userSlice.actions.addNewAdminRequest());
-  await api.post("/user/add/new-admin",data,
-    {
-     
-    }).then(res=>{
-      dispatch(userSlice.actions.addNewAdminSuccess());
-      toast.success(res.data.message);
-      
-  }).catch(err=>{
+
+  try{
+    const res = await api.post(
+      "/user/add/new-admin",
+      data,
+      {
+        headers:{
+          "Content-Type":"multipart/form-data"
+        },
+        withCredentials:true
+      }
+    );
+
+    dispatch(userSlice.actions.addNewAdminSuccess());
+    toast.success(res.data.message);
+
+  }catch(err){
     dispatch(userSlice.actions.addNewAdminFailed());
-    toast.error(err.response.data.message);
-  })
+    toast.error(err.response?.data?.message);
+  }
 }
 
 export default userSlice.reducer;
