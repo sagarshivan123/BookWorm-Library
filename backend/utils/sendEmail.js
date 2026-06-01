@@ -6,9 +6,7 @@ export const sendEmail = async ({ email, subject, message }) => {
     console.log(process.env.SMTP_MAIL);
 console.log(process.env.SMTP_PASSWORD);
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: true,
+  service: "gmail",
   auth: {
     user: process.env.SMTP_MAIL,
     pass: process.env.SMTP_PASSWORD,
@@ -21,7 +19,8 @@ const transporter = nodemailer.createTransport({
       subject,
       html: message,
     };
-
+    await transporter.verify();
+    console.log("SMTP Connected");
     const info = await transporter.sendMail(mailOptions);
     console.log("✅ Email sent:", info.messageId);
     return { success: true, messageId: info.messageId };
