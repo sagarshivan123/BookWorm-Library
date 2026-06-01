@@ -94,7 +94,7 @@ export const sendEmail = async ({ to, name, otp }) => {
           <p>Verify your account to get started</p>
         </div>
         <div class="body">
-          <p class="greeting">Hello, <span>${name}</span>!</p>
+          <p class="greeting">Hello!!</p>
           <p class="description">
             You're almost there! Use the 5-word verification code below to confirm your email address and complete your registration.
           </p>
@@ -102,8 +102,6 @@ export const sendEmail = async ({ to, name, otp }) => {
           <div class="otp-container">
             ${words.map(w => `<span class="otp-word">${w}</span>`).join("")}
           </div>
-          <p class="otp-label">Or copy the full code</p>
-          <div class="otp-full">${otp}</div>
           <div class="expiry">⏱ This code expires in <strong>10 minutes</strong>. Do not share it with anyone.</div>
           <p class="note">If you didn't create an account, you can safely ignore this email. Someone may have entered your email address by mistake.</p>
         </div>
