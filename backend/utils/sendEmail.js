@@ -39,40 +39,24 @@
 //   }
 // };
 
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendEmail = async ({ email, subject, message }) => {
   try {
-    console.log("=== SEND EMAIL STARTED ===");
-    console.log("SMTP_MAIL:", process.env.SMTP_MAIL);
-    console.log("SMTP_HOST:", process.env.SMTP_HOST);
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.SMTP_MAIL,
-        pass: process.env.SMTP_PASSWORD,
-      },
-      connectionTimeout: 30000,
-      greetingTimeout: 30000,
-      socketTimeout: 30000,
-    });
-
-    const info = await transporter.sendMail({
-      from: `"Bookworm Library" <${process.env.SMTP_MAIL}>`,
+    const data = await resend.emails.send({
+      from: "onboarding@resend.dev",
       to: email,
       subject,
       html: message,
     });
 
-    console.log("✅ Email sent:", info.messageId);
-
     return {
       success: true,
-      messageId: info.messageId,
+      data,
     };
   } catch (error) {
-    console.error("❌ EMAIL ERROR");
     console.error(error);
 
     return {
