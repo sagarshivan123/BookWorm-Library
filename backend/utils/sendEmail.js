@@ -5,16 +5,15 @@ export const sendEmail = async ({ email, subject, message }) => {
     console.log("email send...")
     console.log(process.env.SMTP_MAIL);
 console.log(process.env.SMTP_PASSWORD);
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      // service: "gmail",
-      port: 465,
-      secure: true, // true if using port 465 (SSL)
-      auth: {
-        user: process.env.SMTP_MAIL,
-        pass: process.env.SMTP_PASSWORD,
-      },
-    });
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: true,
+  auth: {
+    user: process.env.SMTP_MAIL,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
 
     const mailOptions = {
       from: `"Bookworm Library" <${process.env.SMTP_MAIL}>`,
@@ -27,8 +26,12 @@ console.log(process.env.SMTP_PASSWORD);
     console.log("✅ Email sent:", info.messageId);
     return { success: true, messageId: info.messageId };
 
-  } catch (error) {
-    console.error("❌ Email send failed:", error.message);
-    return { success: false, error: error.message };
+  }catch (error) {
+    console.error("❌ Email send failed:");
+    console.error(error);
+    return {
+      success: false,
+      error: error.message,
+    };
   }
 };

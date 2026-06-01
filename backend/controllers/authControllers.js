@@ -43,9 +43,20 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     const verificationCode = user.generateVerificationCode();
     await user.save();
 
-    await sendVerificationCode(verificationCode, email);
-
-    // ✅ Send the message the frontend actually checks for
+    const emailResult = await sendVerificationCode(
+      verificationCode,
+      email
+    );
+    
+    if (!emailResult.success) {
+      return next(
+        new ErrorHandler(
+          emailResult.error || "Failed to send verification email",
+          500
+        )
+      );
+    }
+    
     res.status(200).json({
       success: true,
       message: "OTP sent successfully",
